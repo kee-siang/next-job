@@ -1,6 +1,7 @@
 <script>
     import humanize from "humanize-plus";
     export let data;
+    import SvelteMarkdown from 'svelte-markdown';
 </script>
 
 <div class="mt-10">
@@ -16,12 +17,12 @@
     <div class="basis-2/3 prose  max-w-none w-full">
         <h2 class="text-xl font-thin">Description</h2>
         <div>
-            {data.job.description}
+            <SvelteMarkdown source={data.job.description} />
         </div>
         <div class="mt-6" />
         <h2 class="text-xl font-thin">Requirements</h2>
         <div>
-            {data.job.requirements}
+            <SvelteMarkdown source={data.job.requirements} />
             <div/>
             <div class = "mt-6" />
             <h2 class="text-xl font-thin">How to Apply?</h2>
