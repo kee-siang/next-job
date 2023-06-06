@@ -1,14 +1,19 @@
+<!-- Update Job Details Page -->
+
 <script>
     import { getUserId, getTokenFromLocalStorage } from '../../../../utils/auth.js'
     import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
+    import { goto } from '$app/navigation';
+	import { writable } from 'svelte/store';
     let formErrors={}
+    let isLoading = writable(false);
     export let data;
 
     async function updateJob(evt){
-        
-        try{
         evt.preventDefault();
         
+        isLoading.set(true);
+
         const JobsData = {
             user:  getUserId(),
             title: evt.target['jobTitle'].value,
@@ -21,7 +26,7 @@
             location: evt.target['jobLocation'].value
             }; 
         
-            const resp = await fetch(PUBLIC_BACKEND_BASE_URL + '/api/collections/jobs/records/' + `${data.job.id}`, {
+            const resp = await fetch(PUBLIC_BACKEND_BASE_URL + 'api/collections/jobs/records/' + `${data.job.id}`, {
             method: 'PATCH',
             mode: 'cors',
             headers: {
@@ -37,19 +42,18 @@
             const res = await resp.json();
             formErrors = res.data;
         }
-    }
-
-        catch(error){
-            console.log(error)
-        }
-
-
+        isLoading.set(false);
     }
 </script>
 
-<form on:submit={updateJob} class="w-full form-control" >
-    <div>
+<svelte:head>
+  <title>Update Job Details | Next Jobs</title>
+</svelte:head>
+
+<form on:submit={updateJob} class="w-full form-control mt-4" >
+        <h1 class="text-3xl font-bold underline decoration-sky-500 py-5 mb-4">Update Job Details Page</h1>
         <div class="m-1">
+    <!-- Job Title section -->
         <label for="Job Title">Job Title</label>
         </div>
         <input
@@ -58,9 +62,16 @@
             placeholder="Software Engineer"
             class="input input-bordered w-full"
             value={data.job.title}
+            required
         />
+        {#if 'title' in formErrors}
+            <label class="label" for="jobTitleError">
+                <span class="label-text-alt text-red-500">{formErrors['title'].message}</span>
+            </label>
+        {/if}
 
-        <div class="m-1">
+    <!-- Min Annual Compensation section -->
+        <div class="m-1 pt-5">
         <label for="Min Annual Compensation">Min Annual Compensation</label>
         </div>
         <input
@@ -69,14 +80,21 @@
             placeholder="40000"
             value={data.job.minAnnualCompensation}
             class="input input-bordered w-full"
+            required
         />
-        
+        {#if 'minAnnualCompensation' in formErrors}
+            <label class="label" for="minAnnualError">
+                <span class="label-text-alt text-red-500">{formErrors['minAnnualCompensation'].message}</span>
+            </label>
+        {/if}
+
             <div class="flex justify-between mt-2 mb-4">
                 <p class="text-xs">USD</p>
                 <p class="text-xs">per annum</p>
             </div>
-        
-        <div class="m-1">
+    
+    <!-- Max Annual Compensation section -->
+        <div class="m-1 pt-5">
         <label for="Max Annual Compensation">Max Annual Compensation</label>
         </div>
         <input
@@ -85,14 +103,21 @@
             placeholder="250000"
             value={data.job.maxAnnualCompensation}
             class="input input-bordered w-full"
+            required
         />
+        {#if 'maxAnnualCompensation' in formErrors}
+            <label class="label" for="maxAnnualError">
+                <span class="label-text-alt text-red-500">{formErrors['maxAnnualCompensation'].message}</span>
+            </label>
+        {/if}
 
             <div class="flex justify-between mt-2 mb-4">
                 <p class="text-xs">USD</p>
                 <p class="text-xs">per annum</p>
             </div>
-        
-        <div class="m-1">
+    
+    <!-- Company Name section -->
+        <div class="m-1 pt-5">
         <label for="Company Name">Company Name</label>
         </div>
         <input
@@ -101,9 +126,11 @@
             placeholder="e.g. Facebook"
             value={data.job.employer}
             class="input input-bordered w-full"
+            required
         />
-
-        <div class="m-1">
+ 
+    <!-- Job Location section -->
+        <div class="m-1 pt-5">
         <label for="Job Location">Job Location</label>
         </div>
         <input
@@ -111,26 +138,48 @@
             name="jobLocation"
             value={data.job.location}
             placeholder="e.g. Singapore"
-
+            required
             class="input input-bordered w-full"/>
 
-        <div class="m-1">
+    <!-- Description section -->
+        <div class="m-1 pt-5">
         <label for="Desription">Description</label>
         </div>
         <textarea class="w-full input input-bordered rounded h-60 pt-2" 
-        name="description">{data.job.description}</textarea>
+        name="description" required>{data.job.description}</textarea>
 
-        <div class="m-1">
+    <!-- Requirements section -->
+        <div class="m-1 pt-5">
         <label for="Requirements">Requirements</label>
         </div>
-        <textarea class="w-full input input-bordered rounded h-60 pt-2" name="requirements">{data.job.requirements}</textarea>
-        
-        <div class="m-1">
-        <label for="Application Instructions">applicationInstructions</label>
+        <textarea class="w-full input input-bordered rounded h-60 pt-2" name="requirements" required>{data.job.requirements}</textarea>
+    
+    <!-- Application Instructions section -->
+        <div class="m-1 pt-5">
+        <label for="Application Instructions">Application Instructions</label>
         </div>
-        <textarea class="w-full input input-bordered rounded h-28 pt-2" name="applicationInstructions">{data.job.applicationInstructions}</textarea>
-    </div>
-    <div>
-        <button class="bg-emerald-400 w-full flex justify-center rounded-lg my-8 py-4">UPDATE JOB</button>
+        <textarea class="w-full input input-bordered rounded h-28 pt-2" name="applicationInstructions" required>{data.job.applicationInstructions}</textarea>
+        {#if 'applicationInstructions' in formErrors}
+            <label class="label" for="applicationInstructionsError">
+                <span class="label-text-alt text-red-500">{formErrors['applicationInstructions'].message}</span>
+            </label>
+        {/if}
+    
+    <!-- Update Job button -->
+    <div class="flex justify-center">
+        <button class="bg-white hover:bg-black hover:text-white w-48 flex justify-center rounded-lg my-8 py-4 border flex justify-center">
+            <div class="flex justify-around">
+                <div>UPDATE JOB</div>
+                <!-- if isLoading is true, show spinner -->
+                {#if $isLoading}
+                <div class="pl-3">
+                <span class="loading loading-spinner loading-md"></span>
+                </div>
+                {/if}
+            </div>
+        </button>
     </div>
 </form>
+
+
+
