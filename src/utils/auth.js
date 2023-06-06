@@ -1,12 +1,18 @@
 import { PUBLIC_BACKEND_BASE_URL } from '$env/static/public';
+import { writable } from 'svelte/store';
+import { goto } from '$app/navigation';
 
 const emptyAuth = {
     "token": "",
     "userId": ""
 }
 
+export let isAuthenticated = writable(false);
+
 export function logOut() {
     localStorage.setItem("auth", JSON.stringify(emptyAuth));
+    isAuthenticated.set(false);
+    goto('/login');
     return true;
 }
 
@@ -27,8 +33,9 @@ export function getTokenFromLocalStorage() {
 }
 
 export async function isLoggedIn(){
+    const token = getTokenFromLocalStorage();
     if(!getTokenFromLocalStorage()){
-        return false
+        return false;
     }
 
     try {
@@ -36,7 +43,7 @@ export async function isLoggedIn(){
             PUBLIC_BACKEND_BASE_URL + 'api/collections/users/auth-refresh',
             {
                 method: 'POST',
-                mode: 'cars',
+                mode: 'cors',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': getTokenFromLocalStorage()
@@ -50,8 +57,9 @@ export async function isLoggedIn(){
                 "token": res.token,
                 "userId": res.record.id
             }));
+            isAuthenticated.set(true);
             return true;
-        }
+        } 
         return false;
     } catch {
         return false;
@@ -81,7 +89,7 @@ export async function authenticateUser(username, password) {
             "token": res.token,
             "userId": res.record.id
         }));
-
+        isAuthenticated.set(true);
         return {
             success: true,
             res: res
