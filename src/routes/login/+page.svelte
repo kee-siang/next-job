@@ -1,60 +1,85 @@
+<!-- Login page -->
+
 <script>
-    let formErrors = {};
-    let text="";
-    import { isLoggedIn } from "../../utils/auth.js";
     import { goto } from '$app/navigation';
-
-    async function signIn() {
-    const LoggedIn = await isLoggedIn();
+    import { authenticateUser } from '../../utils/auth.js';
+    import { writable } from 'svelte/store';
+    let isLoading = writable(false);
+    let username = '';
+    let password = '';
+    let loginStatus = writable(false);
     
-      if (LoggedIn) {
-        // User is logged in, perform further actions
-        console.log("User is logged in.");
-        goto('/jobs/new');
 
-      } else {
-        // User is not logged in
-        console.log("User is not logged in.");
-      }
+    async function signIn(evt) {
+        //prevent page go to the top when the button is clicked//
+        evt.preventDefault();
+
+        isLoading.set(true);
+
+        const login = await authenticateUser(username, password);
+        if(login.success == true){
+            goto('/jobs/new');
+            loginStatus.set(false);
+        }else{
+            loginStatus.set(true);
+        }
+        isLoading.set(false);
     }
     
 </script>
 
-<h1 class="text-center m-3 text-2xl">Login</h1>
+<svelte:head>
+  <title>Login Page | Next Jobs</title>
+</svelte:head>
 
-{#if text.length > 0}
-<p class="text-center" id="welcome-text">Hello {text}</p>
+<!-- If loginStatus is true, show the warning message -->
+{#if $loginStatus}
+<div class="alert alert-warning flex p-4 rounded-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+    <span>Warning: Invalid password/username!</span>
+</div>
+{/if}
+
+<h1 class="text-center m-3 text-3xl p-4">Login</h1>
+
+{#if username.length > 0}
+<p class="text-center" id="welcome-text">Hello {username}</p>
 {/if}
 
 <div class="flex justify-center items-center mt-8">
     <form class="w-1/3">
         <div>
-        <label class="label" for="username">Username</label>
-        <input 
-            type="text"
-            name="username"
-            bind:value={text}
-            placeholder="johndoe"
-            class="input input-bordered w-full"
-        />
-        {#if 'username' in formErrors}
-                  <label class="label" for="username">
-                      <span class="label-text-alt text-red-500">{formErrors['username'].message}</span>
-                  </label>
-        {/if}
-
-        <label class="label" for="username">Password</label>
-        <input 
-            type="password"
-            name="password"
-            password=""
-            class="input input-bordered w-full"
-            required
-        />
-    </div>        
-        <div class="form-control w-full mt-5 p-10">
-            <button on:click={signIn} class="bg-emerald-400 p-5 rounded-lg">Login</button> 
+            <label class="label" for="username">Username</label>
+                <input 
+                type="text"
+                name="userName"
+                bind:value={username}
+                placeholder="johndoe"
+                class="input input-bordered w-full"
+                />
+            <label class="label" for="username">Password</label>
+            <input 
+                type="password"
+                name="Password"
+                bind:value={password}
+                password=""
+                class="input input-bordered w-full"
+                required
+                />
+        </div>        
+        <div class="mt-5 flex justify-center">
+            <button on:click={signIn} class="bg-white hover:bg-black hover:text-white w-48 flex justify-around rounded-lg my-8 py-4 border flex justify-center">
+                <div class="flex justify-around">
+                    <div>Login</div>
+                    <!-- If isLoading is true, show spinner -->
+                    {#if $isLoading}
+                    <div class="pl-3">
+                        <span class="loading loading-spinner loading-md"></span>
+                    </div>
+                    {/if}
+                </div>
+            </button>
         </div>
     </form>
-      
 </div>
+
