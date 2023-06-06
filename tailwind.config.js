@@ -10,13 +10,13 @@ export default {
     // daisyUI config (optional)
     daisyui: {
       styled: true,
-      themes: ["cyberpunk", "dracula"],
+      themes: false,
       base: true,
       utils: true,
       logs: true,
       rtl: false,
       prefix: "",
-      darkTheme: "dracula",
+      darkTheme: "dark",
     },
 }
 
