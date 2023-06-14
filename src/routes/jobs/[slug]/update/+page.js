@@ -17,5 +17,5 @@ export async function load({ fetch, params }) {
             jobs: []
         }
     }
-    }
+    }//else throw redirect
 }
